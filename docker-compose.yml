@@ -1,0 +1,61 @@
+version: '3.8'
+
+services: 
+    db:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: mysql
+        command: --default-authentication-plugin=mysql_native_password
+        restart: always
+        ports:
+            - "3306:3306"
+            - "33060:33060"
+        environment: 
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: mydb
+            MYSQL_USER: user
+            MYSQL_PASSWORD: user
+        volumes: 
+            - ./init:/docker-entrypoint-initdb.d
+            - ./schemas:/var/lib/mysql:rw
+        networks:
+            mysql_network:
+                aliases:
+                    - mysql_host
+    
+    
+    adminer:
+        image: adminer
+        restart: always
+        ports: 
+            - 8080:8080
+        networks:
+            mysql_network:
+                aliases:
+                    - mysql_host
+        
+
+    app:
+        image: jupyter/all-spark-notebook:latest
+        restart: always
+        ports:
+            - "8888:8888"
+            - "4040:4040"
+        environment:
+            PASSWORD: "password"
+            JUPYTER_ENABLE_LAB: "yes"
+        volumes:
+            - ./smart_profiler:/home/jovyan/
+        links: 
+            - "db:mydb"
+        command: "start-notebook.sh --NotebookApp.token='' --NotebookApp.password=''"
+        networks:
+            mysql_network:
+                aliases:
+                    - mysql_host
+
+networks:
+    mysql_network:
+        name: mysql_net
+        driver: bridge
