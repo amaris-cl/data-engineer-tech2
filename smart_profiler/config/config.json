@@ -1,0 +1,1 @@
+{"read_format": "jdbc", "data_url": "jdbc:mysql://mysql_host:3306/mydb", "driver": "com.mysql.jdbc.Driver", "db": "mydb", "table": "trips", "db_user": "user", "db_password": "user"}
